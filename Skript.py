@@ -1,10 +1,12 @@
 from __future__ import print_function
+
+import os.path
 import pickle
 import time
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+
 from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build, HttpError
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -26,6 +28,7 @@ def prev_room_check(sheet):
     prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=prev_values[0]).execute().get('values', [])
     time.sleep(0.2)
     prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=prev_values[1]).execute().get('values', [])
+    time.sleep(0.2)
     if prev1 and prev2 and (prev1[0][0] != '5. ABH' or prev2[0][0] != '5.ABH'):
         return True
     return False
@@ -54,6 +57,7 @@ def main():
             pickle.dump(creds, token)
 
     service = build('sheets', 'v4', credentials=creds)
+    time.sleep(0.2)
 
     # Call the Sheets API
     sheet = service.spreadsheets()
@@ -64,47 +68,55 @@ def main():
     else:
         room_to_get = 'D48'
 
-    for i in range(18000):
-
-        '''prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
-        prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[1]).execute().get('values', [])
-
-        index = 0
-
-        if prev1 and prev2 and prev1[0][0] == "5. ABH" and prev2[0][0] == "5. ABH":
-            index = 1
-
-        test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
-
-        while test_room and index + 1 < len(room_prio):
-            index += 1
-            time.sleep(0.05)
+    for i in range(3600):
+        try:
+            '''prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
+            prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[1]).execute().get('values', [])
+    
+            index = 0
+    
+            if prev1 and prev2 and prev1[0][0] == "5. ABH" and prev2[0][0] == "5. ABH":
+                index = 1
+    
             test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
-            if test_room and test_room[0][0] == "5. ABH":
-                print("Already eingetragen")
-                quit(0)
+    
+            while test_room and index + 1 < len(room_prio):
+                index += 1
+                time.sleep(0.05)
+                test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
+                if test_room and test_room[0][0] == "5. ABH":
+                    print("Already eingetragen")
+                    quit(0)
+    
+            if not test_room:
+                result = service.spreadsheets().values().update(
+                    spreadsheetId=spreadsheet_id, range=room_prio[index],
+                    valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
+                print("Jetzt eingetragen")
+                quit(0)'''
 
-        if not test_room:
-            result = service.spreadsheets().values().update(
-                spreadsheetId=spreadsheet_id, range=room_prio[index],
-                valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
-            print("Jetzt eingetragen")
-            quit(0)'''
-
-        result = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_to_get).execute()
-        values_current = result.get('values', [])
-        if not values_current:
-            print('No data found.')
-            result = service.spreadsheets().values().update(
-                spreadsheetId=spreadsheet_id, range=room_to_get,
-                valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
-        else:
-            if values_current[0][0] == "":
+            result = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_to_get).execute()
+            values_current = result.get('values', [])
+            if not values_current:
+                print('No data found.')
                 result = service.spreadsheets().values().update(
                     spreadsheetId=spreadsheet_id, range=room_to_get,
                     valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
-        print(values_current[0][0])
-        time.sleep(0.4)
+                quit(2)
+            else:
+                if values_current[0][0] == "":
+                    result = service.spreadsheets().values().update(
+                        spreadsheetId=spreadsheet_id, range=room_to_get,
+                        valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
+                    quit(2)
+
+            print(values_current[0][0])
+
+        except HttpError:
+            print('Zu schnell')
+            break
+
+        time.sleep(1)
 
     print("Alles Kaputt")
 

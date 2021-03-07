@@ -15,10 +15,20 @@ spreadsheet_id = '159nIWVZ0XX1B5ouzrCV5bPPqucObhjb9t_00fZXplQM'
 # Test sheet
 # spreadsheet_id = '1K_nswXmeeeQInfrM1zWQTHQ152zd1fs552DeCgKHsNo'
 
-values = ['C26:C26', 'C39:C39', 'C52:C52'] #'C13:C13',
+prev_values = ['C52:C52', 'C39:C39']
+
+values = ['C26:C26', 'C39:C39', 'C52:C52'] #'C13:C13'
 
 room_prio = ['C52:C52', 'D48:D48', 'D49:D49', 'D50:D50', 'C48:C48', 'C49:C49', 'C50:C50']
 
+
+def prev_room_check(sheet):
+    prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=prev_values[0]).execute().get('values', [])
+    time.sleep(0.2)
+    prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=prev_values[1]).execute().get('values', [])
+    if prev1 and prev2 and (prev1[0][0] != '5. ABH' or prev2[0][0] != '5.ABH'):
+        return True
+    return False
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -49,7 +59,10 @@ def main():
     sheet = service.spreadsheets()
     prev1 = None
     prev2 = None
-    for i in range(500):
+    if prev_room_check(sheet):
+        room_to_get = 'C52'
+
+    for i in range(18000):
         prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
         prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[1]).execute().get('values', [])
 

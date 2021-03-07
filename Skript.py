@@ -61,9 +61,12 @@ def main():
     prev2 = None
     if prev_room_check(sheet):
         room_to_get = 'C52'
+    else:
+        room_to_get = 'D48'
 
     for i in range(18000):
-        prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
+
+        '''prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
         prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[1]).execute().get('values', [])
 
         index = 0
@@ -86,23 +89,22 @@ def main():
                 spreadsheetId=spreadsheet_id, range=room_prio[index],
                 valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
             print("Jetzt eingetragen")
-            quit(0)
+            quit(0)'''
 
-        '''for dach in values:
-            result = sheet.values().get(spreadsheetId=spreadsheet_id, range=dach).execute()
-            values_current = result.get('values', [])
-            if not values_current:
-                print('No data found.')
+        result = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_to_get).execute()
+        values_current = result.get('values', [])
+        if not values_current:
+            print('No data found.')
+            result = service.spreadsheets().values().update(
+                spreadsheetId=spreadsheet_id, range=room_to_get,
+                valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
+        else:
+            if values_current[0][0] == "":
                 result = service.spreadsheets().values().update(
-                    spreadsheetId=spreadsheet_id, range=dach,
+                    spreadsheetId=spreadsheet_id, range=room_to_get,
                     valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
-            else:
-                if values_current[0][0] == "":
-                    result = service.spreadsheets().values().update(
-                        spreadsheetId=spreadsheet_id, range=dach,
-                        valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
-            print(values_current[0][0])'''
-        time.sleep(0.2)
+        print(values_current[0][0])
+        time.sleep(0.4)
 
     print("Alles Kaputt")
 

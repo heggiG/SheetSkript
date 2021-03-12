@@ -15,7 +15,7 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 spreadsheet_id = '159nIWVZ0XX1B5ouzrCV5bPPqucObhjb9t_00fZXplQM'
 
 # Test sheet
-# spreadsheet_id = '1K_nswXmeeeQInfrM1zWQTHQ152zd1fs552DeCgKHsNo'
+spreadsheet_id = '1K_nswXmeeeQInfrM1zWQTHQ152zd1fs552DeCgKHsNo'
 
 prev_values = ['C52:C52', 'C39:C39']
 
@@ -23,15 +23,18 @@ values = ['C26:C26', 'C39:C39', 'C52:C52'] #'C13:C13'
 
 room_prio = ['C52:C52', 'D48:D48', 'D49:D49', 'D50:D50', 'C48:C48', 'C49:C49', 'C50:C50']
 
+prev = ''
+
 
 def prev_room_check(sheet):
     prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=prev_values[0]).execute().get('values', [])
     time.sleep(0.2)
     prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=prev_values[1]).execute().get('values', [])
     time.sleep(0.2)
-    if prev1 and prev2 and (prev1[0][0] != '5. ABH' or prev2[0][0] != '5.ABH'):
+    if prev1 and prev2 and (prev1[0][0][0:6] != '5. ABH' or prev2[0][0][0:6] != '5. ABH'):
         return True
     return False
+
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -61,8 +64,7 @@ def main():
 
     # Call the Sheets API
     sheet = service.spreadsheets()
-    prev1 = None
-    prev2 = None
+
     if prev_room_check(sheet):
         room_to_get = 'C52'
     else:
@@ -70,30 +72,6 @@ def main():
 
     for i in range(3600):
         try:
-            '''prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
-            prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[1]).execute().get('values', [])
-    
-            index = 0
-    
-            if prev1 and prev2 and prev1[0][0] == "5. ABH" and prev2[0][0] == "5. ABH":
-                index = 1
-    
-            test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
-    
-            while test_room and index + 1 < len(room_prio):
-                index += 1
-                time.sleep(0.05)
-                test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
-                if test_room and test_room[0][0] == "5. ABH":
-                    print("Already eingetragen")
-                    quit(0)
-    
-            if not test_room:
-                result = service.spreadsheets().values().update(
-                    spreadsheetId=spreadsheet_id, range=room_prio[index],
-                    valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
-                print("Jetzt eingetragen")
-                quit(0)'''
 
             result = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_to_get).execute()
             values_current = result.get('values', [])
@@ -111,10 +89,12 @@ def main():
                     quit(2)
 
             print(values_current[0][0])
-
+            prev = values_current[0][0][0:6]
+            print(prev)
         except HttpError:
             print('Zu schnell')
-            break
+            time.sleep(100)
+
 
         time.sleep(1)
 
@@ -123,3 +103,28 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+'''prev1 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[0]).execute().get('values', [])
+            prev2 = sheet.values().get(spreadsheetId=spreadsheet_id, range=values[1]).execute().get('values', [])
+
+            index = 0
+
+            if prev1 and prev2 and prev1[0][0] == "5. ABH" and prev2[0][0] == "5. ABH":
+                index = 1
+
+            test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
+
+            while test_room and index + 1 < len(room_prio):
+                index += 1
+                time.sleep(0.05)
+                test_room = sheet.values().get(spreadsheetId=spreadsheet_id, range=room_prio[index]).execute().get('values', [])
+                if test_room and test_room[0][0] == "5. ABH":
+                    print("Already eingetragen")
+                    quit(0)
+
+            if not test_room:
+                result = service.spreadsheets().values().update(
+                    spreadsheetId=spreadsheet_id, range=room_prio[index],
+                    valueInputOption="RAW", body={'values': [['5. ABH']]}).execute()
+                print("Jetzt eingetragen")
+                quit(0)'''

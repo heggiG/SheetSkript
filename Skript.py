@@ -15,7 +15,7 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 spreadsheet_id = '159nIWVZ0XX1B5ouzrCV5bPPqucObhjb9t_00fZXplQM'
 
 # Test sheet
-spreadsheet_id = '1K_nswXmeeeQInfrM1zWQTHQ152zd1fs552DeCgKHsNo'
+# spreadsheet_id = '1K_nswXmeeeQInfrM1zWQTHQ152zd1fs552DeCgKHsNo'
 
 prev_values = ['C52:C52', 'C39:C39']
 
